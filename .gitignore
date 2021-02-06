@@ -1,3 +1,9 @@
+# Directories
+build
+build/*
+.vscode
+.vscode/*
+
 # Prerequisites
 *.d
 
