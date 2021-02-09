@@ -1,13 +1,13 @@
-project(Cos6502)
+project(cp6502)
 
 include_directories(${CMAKE_SOURCE_DIR})
 
-add_executable(test_cos6502
+add_executable(test_cp6502
     test/test_LoadRegister.cpp
     test/test_StoreRegister.cpp
     test/test_JumpsAndCalls.cpp
-    core/cos6502.cpp
+    core/cp6502.cpp
     )
-target_link_libraries(test_cos6502 gtest_main gtest pthread)
+target_link_libraries(test_cp6502 gtest_main gtest pthread)
 
-add_test(NAME cos6502_test COMMAND cos6502_test)
+add_test(NAME cp6502_test COMMAND cp6502_test)

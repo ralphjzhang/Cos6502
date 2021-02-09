@@ -2,7 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-namespace cos6502 
+namespace cp6502 
 {
 using Byte = unsigned char;
 using Word = unsigned short;
@@ -14,7 +14,7 @@ struct Mem;
 struct CPU;
 }
 
-struct cos6502::Mem {
+struct cp6502::Mem {
     static constexpr u32 MAX_MEM = 1024 * 64;
     Byte Data[MAX_MEM];
 
@@ -33,7 +33,7 @@ struct cos6502::Mem {
 
 };
 
-struct cos6502::CPU {
+struct cp6502::CPU {
     Word PC;        // program counter
     Byte SP;        // stack pointer
 

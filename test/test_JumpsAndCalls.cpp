@@ -1,8 +1,8 @@
 #include <gtest/gtest.h>
 
-#include "../core/cos6502.hpp"
+#include "../core/cp6502.hpp"
 
-using namespace cos6502;
+using namespace cp6502;
 
 struct JumpsAndCallsTests : public testing::Test {
     Mem mem;

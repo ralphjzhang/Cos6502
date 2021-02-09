@@ -1,6 +1,6 @@
-#include "cos6502.hpp"
+#include "cp6502.hpp"
 
-namespace cos6502 {
+namespace cp6502 {
 
 
 s32 CPU::Execute(s32 cycles, Mem& memory) {
@@ -158,4 +158,4 @@ s32 CPU::Execute(s32 cycles, Mem& memory) {
     return cyclesRequested - cycles;
 }
 
-} // namespace cos6502
+} // namespace cp6502
