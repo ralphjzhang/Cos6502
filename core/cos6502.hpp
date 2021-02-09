@@ -31,16 +31,11 @@ struct cos6502::Mem {
         return Data[address];
     }
 
-    void WriteWord(Word value, u32 address, s32& cycles) {
-        Data[address] = value & 0xFF;
-        Data[address + 1] = (value >> 8);
-        cycles -= 2;
-    }
 };
 
 struct cos6502::CPU {
     Word PC;        // program counter
-    Word SP;        // stack poiter
+    Byte SP;        // stack pointer
 
     Byte A, X, Y;   // registers
 
@@ -52,9 +47,9 @@ struct cos6502::CPU {
     Byte V : 1;
     Byte N : 1;
 
-    void Reset(Mem& memory) {
-        PC = 0xFFFC;
-        SP = 0x0100;
+    void Reset(Word pc, Mem& memory) {
+        PC = pc;
+        SP = 0xFF;
         C = Z = I = D = B = V = N = 0;
         A = X = Y = 0;
         memory.Initialise();
@@ -89,6 +84,28 @@ struct cos6502::CPU {
     void WriteByte(Byte value, s32& cycles, Word addr, Mem& memory) {
         memory[addr] = value;
         --cycles;
+    }
+
+    void WriteWord(Word value, s32& cycles, u32 address, Mem& memory) {
+        memory.Data[address] = value & 0xFF;
+        memory.Data[address + 1] = (value >> 8);
+        cycles -= 2;
+    }
+
+    Word SPToAddress() const {
+        return 0x0100 + SP;
+    }
+
+    void PushPCToStack(s32& cycles, Mem& memory) {
+        WriteWord(PC, cycles, SPToAddress(), memory);
+        SP -= 2;
+    }
+
+    Word PopWordFromStack(s32& cycles, Mem& memory) {
+        SP += 2;
+        Word addr = ReadWord(cycles, SPToAddress(), memory);
+        --cycles;
+        return addr;
     }
 
     void LoadRegisterSetStatus(Byte reg) {
@@ -134,8 +151,9 @@ struct cos6502::CPU {
         INS_STY_ZP = 0x84,
         INS_STY_ZPX = 0x94,
         INS_STY_ABS = 0x8C,
-
-        INS_JSR = 0x20
+        // Jumps And Calls
+        INS_JSR = 0x20,
+        INS_RTS = 0x60
         ;
 
     s32 Execute(s32 cycles, Mem& memory);
@@ -165,6 +183,13 @@ struct cos6502::CPU {
         return addr;
     }
 
+    Word AddrAbsoluteXY_5(s32& cycles, Byte regXY, Mem const& memory) {
+        Word absAddr = FetchWord(cycles, memory);
+        Word addr = absAddr + regXY;
+        --cycles;
+        return addr;
+    }
+
     Word AddrIndirectX(s32& cycles, Mem const& memory) {
         Byte zpAddr = FetchByte(cycles, memory);
         zpAddr += X;
@@ -181,5 +206,14 @@ struct cos6502::CPU {
             --cycles;
         return effectiveAddrY;
     }
+
+    Word AddrIndirectY_6(s32& cycles, Mem const& memory) {
+        Byte zpAddr = FetchByte(cycles, memory);
+        Word effectiveAddr = ReadWord(cycles, zpAddr, memory);
+        Word effectiveAddrY = effectiveAddr + Y;
+        --cycles;
+        return effectiveAddrY;
+    }
+
 };
 

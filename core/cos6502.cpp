@@ -124,30 +124,31 @@ s32 CPU::Execute(s32 cycles, Mem& memory) {
                 WriteByte(Y, cycles, addr, memory);
             } break;
             case INS_STA_ABSX: {
-                Word addr = AddrAbsoluteXY(cycles, X, memory);
+                Word addr = AddrAbsoluteXY_5(cycles, X, memory);
                 WriteByte(A, cycles, addr, memory);
-                --cycles; // TODO why need this?
             } break;
             case INS_STA_ABSY: {
-                Word addr = AddrAbsoluteXY(cycles, Y, memory);
+                Word addr = AddrAbsoluteXY_5(cycles, Y, memory);
                 WriteByte(A, cycles, addr, memory);
-                --cycles; // TODO why need this?
             } break;
             case INS_STA_INDX: {
                 Word addr = AddrIndirectX(cycles, memory);
                 WriteByte(A, cycles, addr, memory);
             } break;
             case INS_STA_INDY: {
-                Word addr = AddrIndirectY(cycles, memory);
+                Word addr = AddrIndirectY_6(cycles, memory);
                 WriteByte(A, cycles, addr, memory);
-                --cycles;
             } break;
-
             case INS_JSR: {
                 Word subAddr = FetchWord(cycles, memory);
-                memory.WriteWord(PC - 1, SP, cycles);
+                PushPCToStack(cycles, memory);
                 PC = subAddr;
                 --cycles;
+            } break;
+            case INS_RTS: {
+                Word retAddr = PopWordFromStack(cycles, memory);
+                PC = retAddr;
+                cycles -= 2;
             } break;
             default: {
                 throw "Instruction not implemented";
