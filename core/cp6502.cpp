@@ -9,6 +9,19 @@ s32 CPU::Execute(s32 cycles, Mem& memory) {
         LoadRegisterSetStatus(reg);
     };
 
+    auto And = [&cycles, &memory, this](Word addr) {
+        A &= ReadByte(cycles, addr, memory);
+        LoadRegisterSetStatus(A);
+    };
+    auto Eor = [&cycles, &memory, this](Word addr) {
+        A ^= ReadByte(cycles, addr, memory);
+        LoadRegisterSetStatus(A);
+    };
+    auto Ora = [&cycles, &memory, this](Word addr) {
+        A |= ReadByte(cycles, addr, memory);
+        LoadRegisterSetStatus(A);
+    };
+
     const s32 cyclesRequested = cycles;
     while (cycles > 0) {
         Byte ins = FetchByte(cycles, memory);
@@ -159,6 +172,7 @@ s32 CPU::Execute(s32 cycles, Mem& memory) {
                 addr = ReadWord(cycles, addr, memory);
                 PC = addr;
             } break;
+            // Stacks
             case INS_TSX: {
                 X = SP;
                 --cycles;
@@ -181,6 +195,104 @@ s32 CPU::Execute(s32 cycles, Mem& memory) {
             case INS_PLP: {
                 PS = PopByteFromStack(cycles, memory);
             } break;
+            // Logicals
+            case INS_AND_IM: {
+                A = A & FetchByte(cycles, memory);
+                LoadRegisterSetStatus(A);
+            } break;
+            case INS_EOR_IM: {
+                A = A ^ FetchByte(cycles, memory);
+                LoadRegisterSetStatus(A);
+            } break;
+            case INS_ORA_IM: {
+                A = A | FetchByte(cycles, memory);
+                LoadRegisterSetStatus(A);
+            } break;
+            case INS_AND_ZP: {
+                Word addr = AddrZeroPage(cycles, memory);
+                And(addr);
+            } break;
+            case INS_EOR_ZP: {
+                Word addr = AddrZeroPage(cycles, memory);
+                Eor(addr);
+            } break;
+            case INS_ORA_ZP: {
+                Word addr = AddrZeroPage(cycles, memory);
+                Ora(addr);
+            } break;
+            case INS_AND_ZPX: {
+                Word addr = AddrZeroPageXY(cycles, X, memory);
+                And(addr);
+            } break;
+            case INS_EOR_ZPX: {
+                Word addr = AddrZeroPageXY(cycles, X, memory);
+                Eor(addr);
+            } break;
+            case INS_ORA_ZPX: {
+                Word addr = AddrZeroPageXY(cycles, X, memory);
+                Ora(addr);
+            } break;
+            case INS_AND_ABS: {
+                Word addr = AddrAbsolute(cycles, memory);
+                And(addr);
+            } break;
+            case INS_EOR_ABS: {
+                Word addr = AddrAbsolute(cycles, memory);
+                Eor(addr);
+            } break;
+            case INS_ORA_ABS: {
+                Word addr = AddrAbsolute(cycles, memory);
+                Ora(addr);
+            } break;
+            case INS_AND_ABSX: {
+                Word addr = AddrAbsoluteXY(cycles, X, memory);
+                And(addr);
+            } break;
+            case INS_EOR_ABSX: {
+                Word addr = AddrAbsoluteXY(cycles, X, memory);
+                Eor(addr);
+            } break;
+            case INS_ORA_ABSX: {
+                Word addr = AddrAbsoluteXY(cycles, X, memory);
+                Ora(addr);
+            } break;
+            case INS_AND_ABSY: {
+                Word addr = AddrAbsoluteXY(cycles, Y, memory);
+                And(addr);
+            } break;
+            case INS_EOR_ABSY: {
+                Word addr = AddrAbsoluteXY(cycles, Y, memory);
+                Eor(addr);
+            } break;
+            case INS_ORA_ABSY: {
+                Word addr = AddrAbsoluteXY(cycles, Y, memory);
+                Ora(addr);
+            } break;
+            case INS_AND_INDX: {
+                Word addr = AddrIndirectX(cycles, memory);
+                And(addr);
+            } break;
+            case INS_EOR_INDX: {
+                Word addr = AddrIndirectX(cycles, memory);
+                Eor(addr);
+            } break;
+            case INS_ORA_INDX: {
+                Word addr = AddrIndirectX(cycles, memory);
+                Ora(addr);
+            } break;
+            case INS_AND_INDY: {
+                Word addr = AddrIndirectY(cycles, memory);
+                And(addr);
+            } break;
+            case INS_EOR_INDY: {
+                Word addr = AddrIndirectY(cycles, memory);
+                Eor(addr);
+            } break;
+            case INS_ORA_INDY: {
+                Word addr = AddrIndirectY(cycles, memory);
+                Ora(addr);
+            } break;
+
             default: {
                 throw "Instruction not implemented";
             } break;
