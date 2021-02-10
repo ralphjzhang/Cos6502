@@ -39,15 +39,21 @@ struct cp6502::CPU {
 
     Byte A, X, Y;   // registers
 
-    Byte C : 1;     // status flags
-    Byte Z : 1;
-    Byte I : 1;
-    Byte D : 1;
-    Byte B : 1;
-    Byte V : 1;
-    Byte N : 1;
+    union {
+        Byte PS;
+        struct {
+            Byte C : 1; // status flags
+            Byte Z : 1;
+            Byte I : 1;
+            Byte D : 1;
+            Byte B : 1;
+            Byte Unused : 1;
+            Byte V : 1;
+            Byte N : 1;
+        };
+    };
 
-    void Reset(Word pc, Mem& memory) {
+    void Reset(Word pc, Mem &memory) {
         PC = pc;
         SP = 0xFF;
         C = Z = I = D = B = V = N = 0;
@@ -101,6 +107,20 @@ struct cp6502::CPU {
         SP -= 2;
     }
 
+    void PushByteOntoStack(s32& cycles, Byte value, Mem& memory) {
+        memory[SPToAddress()] = value;
+        --cycles;
+        --SP;
+        --cycles;
+    }
+
+    Byte PopByteFromStack(s32& cycles, Mem& memory) {
+        ++SP;
+        Byte value = ReadByte(cycles, SPToAddress(), memory);
+        cycles -= 2;
+        return value;
+    }
+
     Word PopWordFromStack(s32& cycles, Mem& memory) {
         SP += 2;
         Word addr = ReadWord(cycles, SPToAddress(), memory);
@@ -151,9 +171,18 @@ struct cp6502::CPU {
         INS_STY_ZP = 0x84,
         INS_STY_ZPX = 0x94,
         INS_STY_ABS = 0x8C,
+        // Stack
+        INS_TSX = 0xBA,
+        INS_TXS = 0x9A,
+        INS_PHA = 0x48,
+        INS_PHP = 0x08,
+        INS_PLA = 0x68,
+        INS_PLP = 0x28,
         // Jumps And Calls
         INS_JSR = 0x20,
-        INS_RTS = 0x60
+        INS_RTS = 0x60,
+        INS_JMP_ABS = 0x4C,
+        INS_JMP_IND = 0x6C
         ;
 
     s32 Execute(s32 cycles, Mem& memory);

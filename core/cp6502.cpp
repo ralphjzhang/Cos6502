@@ -150,6 +150,37 @@ s32 CPU::Execute(s32 cycles, Mem& memory) {
                 PC = retAddr;
                 cycles -= 2;
             } break;
+            case INS_JMP_ABS: {
+                Word addr = AddrAbsolute(cycles, memory);
+                PC = addr;
+            } break;
+            case INS_JMP_IND: {
+                Word addr = AddrAbsolute(cycles, memory);
+                addr = ReadWord(cycles, addr, memory);
+                PC = addr;
+            } break;
+            case INS_TSX: {
+                X = SP;
+                --cycles;
+                LoadRegisterSetStatus(X);
+            } break;
+            case INS_TXS: {
+                SP = X;
+                --cycles;
+            } break;
+            case INS_PHA: {
+                PushByteOntoStack(cycles, A, memory);
+            } break;
+            case INS_PLA: {
+                A = PopByteFromStack(cycles, memory);
+                LoadRegisterSetStatus(A);
+            } break;
+            case INS_PHP: {
+                PushByteOntoStack(cycles, PS, memory);
+            } break;
+            case INS_PLP: {
+                PS = PopByteFromStack(cycles, memory);
+            } break;
             default: {
                 throw "Instruction not implemented";
             } break;
