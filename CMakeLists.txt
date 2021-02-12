@@ -8,6 +8,7 @@ add_executable(test_cp6502
     utest/test_JumpsAndCalls.cpp
     utest/test_StackOperations.cpp
     utest/test_Logical.cpp
+    utest/test_LoadProgram.cpp
     core/cp6502.cpp
     )
 target_link_libraries(test_cp6502 gtest_main gtest pthread)

@@ -215,7 +215,13 @@ struct cp6502::CPU {
         INS_JMP_IND = 0x6C
         ;
 
+    Word LoadProg(Byte* prog, u32 numBytes, Mem& memory);
     s32 Execute(s32 cycles, Mem& memory);
+
+    void PrintStatus() const {
+        printf("A: %d X: %d Y: %d\n", A, X, Y);
+        printf("PC: %d SP: %d\n", PC, SP);
+    }
 
     Word AddrZeroPage(s32& cycles, Mem const& memory) {
         Byte zeroPageAddr = FetchByte(cycles, memory);

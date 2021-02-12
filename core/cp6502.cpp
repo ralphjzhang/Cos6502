@@ -2,6 +2,16 @@
 
 namespace cp6502 {
 
+Word CPU::LoadProg(Byte* prog, u32 numBytes, Mem& memory) {
+    if (prog) {
+        u32 at = 0;
+        Word loadAddr = prog[at++] | (prog[at++] << 8);
+        for (Word i = loadAddr; i < loadAddr + numBytes - 2; ++i)
+            memory[i] = prog[at++];
+        return loadAddr;
+    }
+    return 0;
+}
 
 s32 CPU::Execute(s32 cycles, Mem& memory) {
     auto LoadRegister = [&cycles, &memory, this](Word addr, Byte& reg) {

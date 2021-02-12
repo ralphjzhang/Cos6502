@@ -620,3 +620,4 @@ TEST_F(LogicalTests, BITAbsoluteResultMixed) {
     EXPECT_TRUE(cpu.N);
     EXPECT_FALSE(cpu.V);
 }
+
