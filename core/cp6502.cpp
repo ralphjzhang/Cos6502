@@ -21,6 +21,12 @@ s32 CPU::Execute(s32 cycles, Mem& memory) {
         A |= ReadByte(cycles, addr, memory);
         LoadRegisterSetStatus(A);
     };
+    auto Bit = [&cycles, &memory, this](Word addr) {
+        Byte value = ReadByte(cycles, addr, memory);
+        Z = (A & value) == 0;
+        N = (value >> 7) & 1;
+        V = (value >> 6) & 1;
+    };
 
     const s32 cyclesRequested = cycles;
     while (cycles > 0) {
@@ -291,6 +297,14 @@ s32 CPU::Execute(s32 cycles, Mem& memory) {
             case INS_ORA_INDY: {
                 Word addr = AddrIndirectY(cycles, memory);
                 Ora(addr);
+            } break;
+            case INS_BIT_ZP: {
+                Word addr = AddrZeroPage(cycles, memory);
+                Bit(addr);
+            } break;
+            case INS_BIT_ABS: {
+                Word addr = AddrAbsolute(cycles, memory);
+                Bit(addr);
             } break;
 
             default: {

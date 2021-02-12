@@ -455,5 +455,168 @@ TEST_F(LogicalTests, ORAIndirectYWhenCrossPage) {
         [](Byte lhs, Byte rhs) { return lhs | rhs; });
 }
 
+TEST_F(LogicalTests, BITZeroPage) {
+    // given:
+    cpu.A = 0xFF;
+    cpu.Z = true;
+    cpu.N = cpu.V = false;
+    mem[0xFFFC] = CPU::INS_BIT_ZP;
+    mem[0xFFFD] = 0x42;
+    mem[0x0042] = 0b11000000;
+    CPU cpuCopy = cpu;
+    constexpr s32 EXPECTED_CYCLES = 3;
+    // when:
+    s32 cycleUsed = cpu.Execute(EXPECTED_CYCLES, mem);
+    // then:
+    EXPECT_EQ(cycleUsed, EXPECTED_CYCLES);
+    EXPECT_EQ(cpu.A, cpuCopy.A);
+    EXPECT_FALSE(cpu.Z);
+    EXPECT_TRUE(cpu.N);
+    EXPECT_TRUE(cpu.V);
+}
+
+TEST_F(LogicalTests, BITZeroPageRegisterNVZero) {
+    // given:
+    cpu.A = 0xFF;
+    cpu.Z = true;
+    cpu.N = cpu.V = true;
+    mem[0xFFFC] = CPU::INS_BIT_ZP;
+    mem[0xFFFD] = 0x42;
+    mem[0x0042] = 0b00111111;
+    CPU cpuCopy = cpu;
+    constexpr s32 EXPECTED_CYCLES = 3;
+    // when:
+    s32 cycleUsed = cpu.Execute(EXPECTED_CYCLES, mem);
+    // then:
+    EXPECT_EQ(cycleUsed, EXPECTED_CYCLES);
+    EXPECT_EQ(cpu.A, cpuCopy.A);
+    EXPECT_FALSE(cpu.Z);
+    EXPECT_FALSE(cpu.N);
+    EXPECT_FALSE(cpu.V);
+}
+
+TEST_F(LogicalTests, BITZeroPageResultZero) {
+    // given:
+    cpu.A = 0xFF;
+    cpu.Z = false;
+    cpu.N = cpu.V = false;
+    mem[0xFFFC] = CPU::INS_BIT_ZP;
+    mem[0xFFFD] = 0x42;
+    mem[0x0042] = 0x00;
+    CPU cpuCopy = cpu;
+    constexpr s32 EXPECTED_CYCLES = 3;
+    // when:
+    s32 cycleUsed = cpu.Execute(EXPECTED_CYCLES, mem);
+    // then:
+    EXPECT_EQ(cycleUsed, EXPECTED_CYCLES);
+    EXPECT_EQ(cpu.A, cpuCopy.A);
+    EXPECT_TRUE(cpu.Z);
+    EXPECT_FALSE(cpu.N);
+}
+
+TEST_F(LogicalTests, BITZeroPageResultMixed) {
+    // given:
+    cpu.A = 0xFF;
+    cpu.Z = true;
+    cpu.V = false;
+    cpu.N = true;
+    mem[0xFFFC] = CPU::INS_BIT_ZP;
+    mem[0xFFFD] = 0x42;
+    mem[0x0042] = 0b01000000;
+    CPU cpuCopy = cpu;
+    constexpr s32 EXPECTED_CYCLES = 3;
+    // when:
+    s32 cycleUsed = cpu.Execute(EXPECTED_CYCLES, mem);
+    // then:
+    EXPECT_EQ(cycleUsed, EXPECTED_CYCLES);
+    EXPECT_EQ(cpu.A, cpuCopy.A);
+    EXPECT_FALSE(cpu.Z);
+    EXPECT_FALSE(cpu.N);
+    EXPECT_TRUE(cpu.V);
+}
 
 
+TEST_F(LogicalTests, BITAbsolute) {
+    // given:
+    cpu.A = 0xFF;
+    cpu.Z = true;
+    cpu.N = cpu.V = false;
+    mem[0xFFFC] = CPU::INS_BIT_ABS;
+    mem[0xFFFD] = 0x80;
+    mem[0xFFFE] = 0x44; // 0x4480
+    mem[0x4480] = 0b11000000;
+    CPU cpuCopy = cpu;
+    constexpr s32 EXPECTED_CYCLES = 4;
+    // when:
+    s32 cycleUsed = cpu.Execute(EXPECTED_CYCLES, mem);
+    // then:
+    EXPECT_EQ(cycleUsed, EXPECTED_CYCLES);
+    EXPECT_EQ(cpu.A, cpuCopy.A);
+    EXPECT_FALSE(cpu.Z);
+    EXPECT_TRUE(cpu.N);
+    EXPECT_TRUE(cpu.V);
+}
+
+TEST_F(LogicalTests, BITAbsoluteRegisterNVZero) {
+    // given:
+    cpu.A = 0xFF;
+    cpu.Z = true;
+    cpu.N = cpu.V = true;
+    mem[0xFFFC] = CPU::INS_BIT_ABS;
+    mem[0xFFFD] = 0x80;
+    mem[0xFFFE] = 0x44; // 0x4480
+    mem[0x4480] = 0b00111111;
+    CPU cpuCopy = cpu;
+    constexpr s32 EXPECTED_CYCLES = 4;
+    // when:
+    s32 cycleUsed = cpu.Execute(EXPECTED_CYCLES, mem);
+    // then:
+    EXPECT_EQ(cycleUsed, EXPECTED_CYCLES);
+    EXPECT_EQ(cpu.A, cpuCopy.A);
+    EXPECT_FALSE(cpu.Z);
+    EXPECT_FALSE(cpu.N);
+    EXPECT_FALSE(cpu.V);
+}
+
+TEST_F(LogicalTests, BITAbsoluteResultZero) {
+    // given:
+    cpu.A = 0xFF;
+    cpu.Z = false;
+    cpu.N = cpu.V = true;
+    mem[0xFFFC] = CPU::INS_BIT_ABS;
+    mem[0xFFFD] = 0x80;
+    mem[0xFFFE] = 0x44; // 0x4480
+    mem[0x4480] = 0b00;
+    CPU cpuCopy = cpu;
+    constexpr s32 EXPECTED_CYCLES = 4;
+    // when:
+    s32 cycleUsed = cpu.Execute(EXPECTED_CYCLES, mem);
+    // then:
+    EXPECT_EQ(cycleUsed, EXPECTED_CYCLES);
+    EXPECT_EQ(cpu.A, cpuCopy.A);
+    EXPECT_TRUE(cpu.Z);
+    EXPECT_FALSE(cpu.N);
+    EXPECT_FALSE(cpu.V);
+}
+
+TEST_F(LogicalTests, BITAbsoluteResultMixed) {
+    // given:
+    cpu.A = 0xFF;
+    cpu.Z = true;
+    cpu.V = true;
+    cpu.N = false;
+    mem[0xFFFC] = CPU::INS_BIT_ABS;
+    mem[0xFFFD] = 0x80;
+    mem[0xFFFE] = 0x44; // 0x4480
+    mem[0x4480] = 0b10000000;
+    CPU cpuCopy = cpu;
+    constexpr s32 EXPECTED_CYCLES = 4;
+    // when:
+    s32 cycleUsed = cpu.Execute(EXPECTED_CYCLES, mem);
+    // then:
+    EXPECT_EQ(cycleUsed, EXPECTED_CYCLES);
+    EXPECT_EQ(cpu.A, cpuCopy.A);
+    EXPECT_FALSE(cpu.Z);
+    EXPECT_TRUE(cpu.N);
+    EXPECT_FALSE(cpu.V);
+}

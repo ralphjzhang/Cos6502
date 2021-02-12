@@ -3,11 +3,11 @@ project(cp6502)
 include_directories(${CMAKE_SOURCE_DIR})
 
 add_executable(test_cp6502
-    test/test_LoadRegister.cpp
-    test/test_StoreRegister.cpp
-    test/test_JumpsAndCalls.cpp
-    test/test_StackOperations.cpp
-    test/test_Logical.cpp
+    utest/test_LoadRegister.cpp
+    utest/test_StoreRegister.cpp
+    utest/test_JumpsAndCalls.cpp
+    utest/test_StackOperations.cpp
+    utest/test_Logical.cpp
     core/cp6502.cpp
     )
 target_link_libraries(test_cp6502 gtest_main gtest pthread)

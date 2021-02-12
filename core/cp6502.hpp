@@ -205,6 +205,9 @@ struct cp6502::CPU {
         INS_ORA_ABSY = 0x19,
         INS_ORA_INDX = 0x01,
         INS_ORA_INDY = 0x11,
+        // BIT
+        INS_BIT_ZP = 0x24,
+        INS_BIT_ABS = 0x2C,
         // Jumps And Calls
         INS_JSR = 0x20,
         INS_RTS = 0x60,
