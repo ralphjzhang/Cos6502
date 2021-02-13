@@ -208,6 +208,24 @@ struct cp6502::CPU {
         // BIT
         INS_BIT_ZP = 0x24,
         INS_BIT_ABS = 0x2C,
+        // Register Transfer
+        INS_TAX = 0xAA,
+        INS_TAY = 0xA8,
+        INS_TXA = 0x8A,
+        INS_TYA = 0x98,
+        // Increment Decrement
+        INS_INX = 0xE8,
+        INS_INY = 0xC8,
+        INS_DEX = 0xCA,
+        INS_DEY = 0x88,
+        INS_INC_ZP = 0xE6,
+        INS_INC_ZPX = 0xF6,
+        INS_INC_ABS = 0xEE,
+        INS_INC_ABSX = 0xFE,
+        INS_DEC_ZP = 0xC6,
+        INS_DEC_ZPX = 0xD6,
+        INS_DEC_ABS = 0xCE,
+        INS_DEC_ABSX = 0xDE,
         // Jumps And Calls
         INS_JSR = 0x20,
         INS_RTS = 0x60,

@@ -38,6 +38,17 @@ s32 CPU::Execute(s32 cycles, Mem& memory) {
         V = (value >> 6) & 1;
     };
 
+    auto Inc = [&cycles, &memory, this](Word addr) {
+        Byte value = ReadByte(cycles, addr, memory);
+        WriteByte(++value, cycles, addr, memory);
+        LoadRegisterSetStatus(value);
+    };
+    auto Dec = [&cycles, &memory, this](Word addr) {
+        Byte value = ReadByte(cycles, addr, memory);
+        WriteByte(--value, cycles, addr, memory);
+        LoadRegisterSetStatus(value);
+    };
+
     const s32 cyclesRequested = cycles;
     while (cycles > 0) {
         Byte ins = FetchByte(cycles, memory);
@@ -315,6 +326,86 @@ s32 CPU::Execute(s32 cycles, Mem& memory) {
             case INS_BIT_ABS: {
                 Word addr = AddrAbsolute(cycles, memory);
                 Bit(addr);
+            } break;
+            case INS_TAX: {
+                X = A;
+                LoadRegisterSetStatus(X);
+                cycles -= 2;
+            } break;
+            case INS_TAY: {
+                Y = A;
+                LoadRegisterSetStatus(Y);
+                cycles -= 2;
+            } break;
+            case INS_TXA: {
+                A = X;
+                LoadRegisterSetStatus(A);
+                cycles -= 2;
+            } break;
+            case INS_TYA: {
+                A = Y;
+                LoadRegisterSetStatus(A);
+                cycles -= 2;
+            } break;
+            case INS_INX: {
+                ++X;
+                LoadRegisterSetStatus(X);
+                cycles -= 2;
+            } break;
+            case INS_INY: {
+                ++Y;
+                LoadRegisterSetStatus(Y);
+                cycles -= 2;
+            } break;
+            case INS_DEX: {
+                --X;
+                LoadRegisterSetStatus(X);
+                cycles -= 2;
+            } break;
+            case INS_DEY: {
+                --Y;
+                LoadRegisterSetStatus(Y);
+                cycles -= 2;
+            } break;
+            case INS_INC_ZP: {
+                Word addr = AddrZeroPage(cycles, memory);
+                Inc(addr);
+                cycles -= 2;
+            } break;
+            case INS_INC_ZPX: {
+                Word addr = AddrZeroPageXY(cycles, X, memory);
+                Inc(addr);
+                cycles -= 2;
+            } break;
+            case INS_INC_ABS: {
+                Word addr = AddrAbsolute(cycles, memory);
+                Inc(addr);
+                cycles -= 2;
+            } break;
+            case INS_INC_ABSX: {
+                Word addr = AddrAbsoluteXY(cycles, X, memory);
+                Inc(addr);
+                cycles -= 2;
+            } break;
+            case INS_DEC_ZP: {
+                Word addr = AddrZeroPage(cycles, memory);
+                Dec(addr);
+                cycles -= 2;
+            } break;
+            case INS_DEC_ZPX: {
+                Word addr = AddrZeroPageXY(cycles, X, memory);
+                Dec(addr);
+                cycles -= 2;
+            } break;
+            case INS_DEC_ABS: {
+                Word addr = AddrAbsolute(cycles, memory);
+                Dec(addr);
+                cycles -= 2;
+            } break;
+            case INS_DEC_ABSX: {
+                Word addr = AddrAbsoluteXY(cycles, X, memory);
+                Dec(addr);
+                cycles -= 2;
             } break;
 
             default: {
