@@ -226,6 +226,8 @@ struct cp6502::CPU {
         INS_DEC_ZPX = 0xD6,
         INS_DEC_ABS = 0xCE,
         INS_DEC_ABSX = 0xDE,
+        // Branches
+        INS_BEQ = 0xF0,
         // Jumps And Calls
         INS_JSR = 0x20,
         INS_RTS = 0x60,

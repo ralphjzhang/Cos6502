@@ -407,6 +407,17 @@ s32 CPU::Execute(s32 cycles, Mem& memory) {
                 Dec(addr);
                 cycles -= 2;
             } break;
+            case INS_BEQ: {
+                Byte offset = FetchByte(cycles, memory);
+                if (Z) {
+                    const Word oldPC = PC;
+                    PC += static_cast<signed char>(offset);
+                    cycles--;
+                    const bool pageChanged = (PC >> 8) != (oldPC >> 8);
+                    if (pageChanged)
+                        cycles -= 2;
+                }
+            } break;
 
             default: {
                 throw "Instruction not implemented";

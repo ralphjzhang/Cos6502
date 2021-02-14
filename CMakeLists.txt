@@ -11,6 +11,7 @@ add_executable(test_cp6502
     utest/test_LoadProgram.cpp
     utest/test_RegisterTransfers.cpp
     utest/test_IncrementDecrements.cpp
+    utest/test_Branches.cpp
     core/cp6502.cpp
     )
 target_link_libraries(test_cp6502 gtest_main gtest pthread)
