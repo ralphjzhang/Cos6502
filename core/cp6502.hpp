@@ -4,6 +4,7 @@
 
 namespace cp6502 
 {
+using SByte = signed char;
 using Byte = unsigned char;
 using Word = unsigned short;
 
@@ -228,6 +229,23 @@ struct cp6502::CPU {
         INS_DEC_ABSX = 0xDE,
         // Branches
         INS_BEQ = 0xF0,
+        INS_BNE = 0xD0,
+        INS_BCC = 0x90,
+        INS_BCS = 0xB0,
+        INS_BMI = 0x30,
+        INS_BPL = 0x10,
+        INS_BVS = 0x70,
+        INS_BVC = 0x50,
+        // Status Flags Changes
+        INS_CLC = 0x18,
+        INS_CLD = 0xD8,
+        INS_CLI = 0x58,
+        INS_CLV = 0xB8,
+        INS_SEC = 0x38,
+        INS_SED = 0xF8,
+        INS_SEI = 0x78,
+        // NOP
+        INS_NOP = 0xEA,
         // Jumps And Calls
         INS_JSR = 0x20,
         INS_RTS = 0x60,

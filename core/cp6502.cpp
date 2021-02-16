@@ -49,6 +49,19 @@ s32 CPU::Execute(s32 cycles, Mem& memory) {
         LoadRegisterSetStatus(value);
     };
 
+    auto BranchIf = [&cycles, &memory, this](auto predicate) {
+        Byte offset = FetchByte(cycles, memory);
+        if (predicate())
+        {
+            const Word oldPC = PC;
+            PC += static_cast<SByte>(offset);
+            cycles--;
+            const bool pageChanged = (PC >> 8) != (oldPC >> 8);
+            if (pageChanged)
+                cycles -= 2;
+        }
+    };
+
     const s32 cyclesRequested = cycles;
     while (cycles > 0) {
         Byte ins = FetchByte(cycles, memory);
@@ -408,15 +421,59 @@ s32 CPU::Execute(s32 cycles, Mem& memory) {
                 cycles -= 2;
             } break;
             case INS_BEQ: {
-                Byte offset = FetchByte(cycles, memory);
-                if (Z) {
-                    const Word oldPC = PC;
-                    PC += static_cast<signed char>(offset);
-                    cycles--;
-                    const bool pageChanged = (PC >> 8) != (oldPC >> 8);
-                    if (pageChanged)
-                        cycles -= 2;
-                }
+                BranchIf([this]() -> bool { return Z; });
+            } break;
+            case INS_BNE: {
+                BranchIf([this]() -> bool { return !Z; });
+            } break;
+            case INS_BCC: {
+                BranchIf([this]() -> bool { return !C; });
+            } break;
+            case INS_BCS: {
+                BranchIf([this]() -> bool { return C; });
+            } break;
+            case INS_BMI: {
+                BranchIf([this]() -> bool { return N; });
+            } break;
+            case INS_BPL: {
+                BranchIf([this]() -> bool { return !N; });
+            } break;
+            case INS_BVS: {
+                BranchIf([this]() -> bool { return V; });
+            } break;
+            case INS_BVC: {
+                BranchIf([this]() -> bool { return !V; });
+            } break;
+            case INS_CLC: {
+                C = 0;
+                --cycles;
+            } break;
+            case INS_CLD: {
+                D = 0;
+                --cycles;
+            } break;
+            case INS_CLI: {
+                I = 0;
+                --cycles;
+            } break;
+            case INS_CLV: {
+                V = 0;
+                --cycles;
+            } break;
+            case INS_SEC: {
+                C = 1;
+                --cycles;
+            } break;
+            case INS_SED: {
+                D = 1;
+                --cycles;
+            } break;
+            case INS_SEI: {
+                I = 1;
+                --cycles;
+            } break;
+            case INS_NOP: {
+                --cycles;
             } break;
 
             default: {
