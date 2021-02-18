@@ -62,6 +62,22 @@ s32 CPU::Execute(s32 cycles, Mem& memory) {
         }
     };
 
+    auto ADC = [this](Byte operand) {
+        if (D) throw "Decimal not implemented";
+        Byte ASign = (A & NFlagBit);
+        Byte operandSign = (operand & NFlagBit);
+        Word sum = A;
+        sum += C;
+        sum += operand;
+        A = (sum & 0xFF);
+        C = sum > 0xFF;
+        Z = (A == 0);
+        // overflow:
+        // two operand have same sign, but the result has different sign
+        V = (ASign == operandSign) && ((A & NFlagBit) != ASign);
+        N = (A & NFlagBit) > 0;
+    };
+
     const s32 cyclesRequested = cycles;
     while (cycles > 0) {
         Byte ins = FetchByte(cycles, memory);
@@ -475,21 +491,44 @@ s32 CPU::Execute(s32 cycles, Mem& memory) {
             case INS_NOP: {
                 --cycles;
             } break;
+            case INS_ADC_IM: {
+                Byte operand = FetchByte(cycles, memory);
+                ADC(operand);
+            } break;
+            case INS_ADC_ZP: {
+                Word addr = AddrZeroPage(cycles, memory);
+                Byte operand = ReadByte(cycles, addr, memory);
+                ADC(operand);
+            } break;
+            case INS_ADC_ZPX: {
+                Word addr = AddrZeroPageXY(cycles, X, memory);
+                Byte operand = ReadByte(cycles, addr, memory);
+                ADC(operand);
+            } break;
             case INS_ADC_ABS: {
                 Word addr = AddrAbsolute(cycles, memory);
                 Byte operand = ReadByte(cycles, addr, memory);
-                Byte ASign = (A & NFlagBit);
-                Byte operandSign = (operand & NFlagBit);
-                Word sum = A;
-                sum += C;
-                sum += operand;
-                A = (sum & 0xFF);
-                C = (sum & 0xFF00) > 0;
-                Z = (A == 0);
-                // overflow:
-                // two operand have same sign, but the result has different sign
-                V = (ASign == operandSign) && ((A & NFlagBit) != ASign);
-                N = (A & NFlagBit) > 0;
+                ADC(operand);
+            } break;
+            case INS_ADC_ABSX: {
+                Word addr = AddrAbsoluteXY(cycles, X, memory);
+                Byte operand = ReadByte(cycles, addr, memory);
+                ADC(operand);
+            } break;
+            case INS_ADC_ABSY: {
+                Word addr = AddrAbsoluteXY(cycles, Y, memory);
+                Byte operand = ReadByte(cycles, addr, memory);
+                ADC(operand);
+            } break;
+            case INS_ADC_INDX: {
+                Word addr = AddrIndirectX(cycles, memory);
+                Byte operand = ReadByte(cycles, addr, memory);
+                ADC(operand);
+            } break;
+            case INS_ADC_INDY: {
+                Word addr = AddrIndirectY(cycles, memory);
+                Byte operand = ReadByte(cycles, addr, memory);
+                ADC(operand);
             } break;
 
             default: {
