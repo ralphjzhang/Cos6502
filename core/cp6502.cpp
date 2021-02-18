@@ -475,6 +475,22 @@ s32 CPU::Execute(s32 cycles, Mem& memory) {
             case INS_NOP: {
                 --cycles;
             } break;
+            case INS_ADC_ABS: {
+                Word addr = AddrAbsolute(cycles, memory);
+                Byte operand = ReadByte(cycles, addr, memory);
+                Byte ASign = (A & NFlagBit);
+                Byte operandSign = (operand & NFlagBit);
+                Word sum = A;
+                sum += C;
+                sum += operand;
+                A = (sum & 0xFF);
+                C = (sum & 0xFF00) > 0;
+                Z = (A == 0);
+                // overflow:
+                // two operand have same sign, but the result has different sign
+                V = (ASign == operandSign) && ((A & NFlagBit) != ASign);
+                N = (A & NFlagBit) > 0;
+            } break;
 
             default: {
                 throw "Instruction not implemented";

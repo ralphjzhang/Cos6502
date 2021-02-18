@@ -11,6 +11,8 @@ using Word = unsigned short;
 using u32 = unsigned int;
 using s32 = signed int;
 
+const static Byte NFlagBit = 0b10000000;
+
 struct Mem;
 struct CPU;
 }
@@ -246,6 +248,8 @@ struct cp6502::CPU {
         INS_SEI = 0x78,
         // NOP
         INS_NOP = 0xEA,
+        // Arithmetic
+        INS_ADC_ABS = 0x6D,
         // Jumps And Calls
         INS_JSR = 0x20,
         INS_RTS = 0x60,

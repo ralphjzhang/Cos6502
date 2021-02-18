@@ -13,6 +13,7 @@ add_executable(test_cp6502
     utest/test_IncrementDecrements.cpp
     utest/test_Branches.cpp
     utest/test_StatusFlagChanges.cpp
+    utest/test_AddWithCarry.cpp
     core/cp6502.cpp
     )
 target_link_libraries(test_cp6502 gtest_main gtest pthread)
