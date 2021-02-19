@@ -349,3 +349,29 @@ TEST_F(CompareTests, CPY_ABS_130_26) {
 TEST_F(CompareTests, CPY_ABS_8_26) {
     TestCPY_ABS(data_cmp_8_26);
 }
+
+TEST_F(CompareTests, CompareInProgram) {
+    // given:
+    /*
+        * = $1000
+
+        lda #0
+        clc
+        loop
+            adc #8
+            cmp #24
+            bne loop
+
+        ldx #20
+    */
+    Byte TestProg[] = { 0x00,0x10,0xA9,0x00,0x18,0x69,0x08,0xC9,0x18,0xD0,0xFA,0xA2,0x14 };
+    const int NumByteTestProg = sizeof(TestProg) / sizeof(Byte);
+    cpu.PC = cpu.LoadProg(TestProg, NumByteTestProg, mem);
+    constexpr s32 EXPECTED_CYCLES = 26;
+    CPU cpuCopy = cpu;
+    // when:
+    const s32 actualCycles = cpu.Execute(EXPECTED_CYCLES, mem);
+    // then:
+    EXPECT_EQ(cpu.X, 20);
+    EXPECT_EQ(cpu.A, 24);
+}

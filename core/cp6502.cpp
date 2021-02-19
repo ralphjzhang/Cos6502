@@ -78,22 +78,10 @@ s32 CPU::Execute(s32 cycles, Mem& memory) {
         N = (A & NFlagBit) > 0;
     };
 
-    auto CMP = [this](Byte operand) {
-        Byte diff = A - operand;
-        C = A >= operand;
-        Z = A == operand;
-        N = (diff & NFlagBit) > 0;
-    };
-    auto CPX = [this](Byte operand) {
-        Byte diff = X - operand;
-        C = X >= operand;
-        Z = X == operand;
-        N = (diff & NFlagBit) > 0;
-    };
-    auto CPY = [this](Byte operand) {
-        Byte diff = Y - operand;
-        C = Y >= operand;
-        Z = Y == operand;
+    auto Compare = [this](Byte operand, Byte reg) {
+        Byte diff = reg - operand;
+        C = reg >= operand;
+        Z = reg == operand;
         N = (diff & NFlagBit) > 0;
     };
 
@@ -551,70 +539,70 @@ s32 CPU::Execute(s32 cycles, Mem& memory) {
             } break;
             case INS_CMP_IM: {
                 Byte operand = FetchByte(cycles, memory);
-                CMP(operand);
+                Compare(operand, A);
             } break;
             case INS_CMP_ZP: {
                 Word addr = AddrZeroPage(cycles, memory);
                 Byte operand = ReadByte(cycles, addr, memory);
-                CMP(operand);
+                Compare(operand, A);
             } break;
             case INS_CMP_ZPX: {
                 Word addr = AddrZeroPageXY(cycles, X, memory);
                 Byte operand = ReadByte(cycles, addr, memory);
-                CMP(operand);
+                Compare(operand, A);
             } break;
             case INS_CMP_ABS: {
                 Word addr = AddrAbsolute(cycles, memory);
                 Byte operand = ReadByte(cycles, addr, memory);
-                CMP(operand);
+                Compare(operand, A);
             } break;
             case INS_CMP_ABSX: {
                 Word addr = AddrAbsoluteXY(cycles, X, memory);
                 Byte operand = ReadByte(cycles, addr, memory);
-                CMP(operand);
+                Compare(operand, A);
             } break;
             case INS_CMP_ABSY: {
                 Word addr = AddrAbsoluteXY(cycles, Y, memory);
                 Byte operand = ReadByte(cycles, addr, memory);
-                CMP(operand);
+                Compare(operand, A);
             } break;
             case INS_CMP_INDX: {
                 Word addr = AddrIndirectX(cycles, memory);
                 Byte operand = ReadByte(cycles, addr, memory);
-                CMP(operand);
+                Compare(operand, A);
             } break;
             case INS_CMP_INDY: {
                 Word addr = AddrIndirectY(cycles, memory);
                 Byte operand = ReadByte(cycles, addr, memory);
-                CMP(operand);
+                Compare(operand, A);
             } break;
             case INS_CPX_IM: {
                 Byte operand = FetchByte(cycles, memory);
-                CPX(operand);
+                Compare(operand, X);
             } break;
             case INS_CPX_ZP: {
                 Word addr = AddrZeroPage(cycles, memory);
                 Byte operand = ReadByte(cycles, addr, memory);
-                CPX(operand);
+                Compare(operand, X);
             } break;
             case INS_CPX_ABS: {
                 Word addr = AddrAbsolute(cycles, memory);
                 Byte operand = ReadByte(cycles, addr, memory);
-                CPX(operand);
+                Compare(operand, X);
             } break;
             case INS_CPY_IM: {
                 Byte operand = FetchByte(cycles, memory);
-                CPY(operand);
+                Compare(operand, Y);
             } break;
             case INS_CPY_ZP: {
                 Word addr = AddrZeroPage(cycles, memory);
                 Byte operand = ReadByte(cycles, addr, memory);
-                CPY(operand);
+                Compare(operand, Y);
             } break;
             case INS_CPY_ABS: {
                 Word addr = AddrAbsolute(cycles, memory);
                 Byte operand = ReadByte(cycles, addr, memory);
-                CPY(operand);
+                Compare(operand, Y);
             } break;
 
             default: {

@@ -2,6 +2,11 @@
 ; ./tmpx -i test_code.ms -o test_code.prg
 * = $1000
 
-loop
 lda #0
-beq loop
+clc
+loop
+    adc #8
+    cmp #24
+    bne loop
+
+ldx #20
