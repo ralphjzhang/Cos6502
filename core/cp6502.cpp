@@ -84,6 +84,18 @@ s32 CPU::Execute(s32 cycles, Mem& memory) {
         Z = A == operand;
         N = (diff & NFlagBit) > 0;
     };
+    auto CPX = [this](Byte operand) {
+        Byte diff = X - operand;
+        C = X >= operand;
+        Z = X == operand;
+        N = (diff & NFlagBit) > 0;
+    };
+    auto CPY = [this](Byte operand) {
+        Byte diff = Y - operand;
+        C = Y >= operand;
+        Z = Y == operand;
+        N = (diff & NFlagBit) > 0;
+    };
 
     const s32 cyclesRequested = cycles;
     while (cycles > 0) {
@@ -575,6 +587,34 @@ s32 CPU::Execute(s32 cycles, Mem& memory) {
                 Word addr = AddrIndirectY(cycles, memory);
                 Byte operand = ReadByte(cycles, addr, memory);
                 CMP(operand);
+            } break;
+            case INS_CPX_IM: {
+                Byte operand = FetchByte(cycles, memory);
+                CPX(operand);
+            } break;
+            case INS_CPX_ZP: {
+                Word addr = AddrZeroPage(cycles, memory);
+                Byte operand = ReadByte(cycles, addr, memory);
+                CPX(operand);
+            } break;
+            case INS_CPX_ABS: {
+                Word addr = AddrAbsolute(cycles, memory);
+                Byte operand = ReadByte(cycles, addr, memory);
+                CPX(operand);
+            } break;
+            case INS_CPY_IM: {
+                Byte operand = FetchByte(cycles, memory);
+                CPY(operand);
+            } break;
+            case INS_CPY_ZP: {
+                Word addr = AddrZeroPage(cycles, memory);
+                Byte operand = ReadByte(cycles, addr, memory);
+                CPY(operand);
+            } break;
+            case INS_CPY_ABS: {
+                Word addr = AddrAbsolute(cycles, memory);
+                Byte operand = ReadByte(cycles, addr, memory);
+                CPY(operand);
             } break;
 
             default: {
