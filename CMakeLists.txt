@@ -1,5 +1,7 @@
 project(cp6502)
 
+set(CMAKE_CXX_STANDARD 20)
+
 include_directories(${CMAKE_SOURCE_DIR})
 
 add_executable(test_cp6502
@@ -14,6 +16,7 @@ add_executable(test_cp6502
     utest/test_Branches.cpp
     utest/test_StatusFlagChanges.cpp
     utest/test_AddWithCarry.cpp
+    utest/test_Compare.cpp
     core/cp6502.cpp
     )
 target_link_libraries(test_cp6502 gtest_main gtest pthread)

@@ -78,6 +78,13 @@ s32 CPU::Execute(s32 cycles, Mem& memory) {
         N = (A & NFlagBit) > 0;
     };
 
+    auto CMP = [this](Byte operand) {
+        Byte diff = A - operand;
+        C = A >= operand;
+        Z = A == operand;
+        N = (diff & NFlagBit) > 0;
+    };
+
     const s32 cyclesRequested = cycles;
     while (cycles > 0) {
         Byte ins = FetchByte(cycles, memory);
@@ -529,6 +536,45 @@ s32 CPU::Execute(s32 cycles, Mem& memory) {
                 Word addr = AddrIndirectY(cycles, memory);
                 Byte operand = ReadByte(cycles, addr, memory);
                 ADC(operand);
+            } break;
+            case INS_CMP_IM: {
+                Byte operand = FetchByte(cycles, memory);
+                CMP(operand);
+            } break;
+            case INS_CMP_ZP: {
+                Word addr = AddrZeroPage(cycles, memory);
+                Byte operand = ReadByte(cycles, addr, memory);
+                CMP(operand);
+            } break;
+            case INS_CMP_ZPX: {
+                Word addr = AddrZeroPageXY(cycles, X, memory);
+                Byte operand = ReadByte(cycles, addr, memory);
+                CMP(operand);
+            } break;
+            case INS_CMP_ABS: {
+                Word addr = AddrAbsolute(cycles, memory);
+                Byte operand = ReadByte(cycles, addr, memory);
+                CMP(operand);
+            } break;
+            case INS_CMP_ABSX: {
+                Word addr = AddrAbsoluteXY(cycles, X, memory);
+                Byte operand = ReadByte(cycles, addr, memory);
+                CMP(operand);
+            } break;
+            case INS_CMP_ABSY: {
+                Word addr = AddrAbsoluteXY(cycles, Y, memory);
+                Byte operand = ReadByte(cycles, addr, memory);
+                CMP(operand);
+            } break;
+            case INS_CMP_INDX: {
+                Word addr = AddrIndirectX(cycles, memory);
+                Byte operand = ReadByte(cycles, addr, memory);
+                CMP(operand);
+            } break;
+            case INS_CMP_INDY: {
+                Word addr = AddrIndirectY(cycles, memory);
+                Byte operand = ReadByte(cycles, addr, memory);
+                CMP(operand);
             } break;
 
             default: {
