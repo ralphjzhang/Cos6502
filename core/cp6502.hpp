@@ -275,7 +275,14 @@ struct cp6502::CPU {
         INS_CPY_ZP = 0xC4,
         INS_CPY_ABS = 0xCC,
         // SBC
+        INS_SBC_IM = 0xE9,
+        INS_SBC_ZP = 0xE5,
+        INS_SBC_ZPX = 0xF5,
         INS_SBC_ABS = 0xED,
+        INS_SBC_ABSX = 0xFD,
+        INS_SBC_ABSY = 0xF9,
+        INS_SBC_INDX = 0xE1,
+        INS_SBC_INDY = 0xF1,
         // Jumps And Calls
         INS_JSR = 0x20,
         INS_RTS = 0x60,

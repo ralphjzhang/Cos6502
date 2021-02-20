@@ -90,6 +90,88 @@ struct SubstractWithCarryTests : public testing::Test {
         };
         Test(t, setAbsMem);
     }
+
+    void TestIM(SBCTestData t) {
+        auto setImMem = [this](Byte operand) {
+            mem[0xFF00] = CPU::INS_SBC_IM;
+            mem[0xFF01] = operand;
+            return 2; // expected cycles;
+        };
+        Test(t, setImMem);
+    }
+
+    void TestZP(SBCTestData t) {
+        auto setZPMem = [this](Byte operand) {
+            mem[0xFF00] = CPU::INS_SBC_ZP;
+            mem[0xFF01] = 0x42;
+            mem[0x0042] = operand;
+            return 3; // expected cycles;
+        };
+        Test(t, setZPMem);
+    }
+
+    void TestZPX(SBCTestData t) {
+        auto setZPXMem = [this](Byte operand) {
+            cpu.X = 0x01;
+            mem[0xFF00] = CPU::INS_SBC_ZPX;
+            mem[0xFF01] = 0x42;
+            mem[0x0043] = operand;
+            return 4; // expected cycles;
+        };
+        Test(t, setZPXMem);
+    }
+
+    void TestABSX(SBCTestData t) {
+        auto setABSXMem = [this](Byte operand) {
+            cpu.X = 0x01;
+            mem[0xFF00] = CPU::INS_SBC_ABSX;
+            mem[0xFF01] = 0x00;
+            mem[0xFF02] = 0x80;
+            mem[0x8001] = operand;
+            return 4; // expected cycles;
+        };
+        Test(t, setABSXMem);
+    }
+
+    void TestABSY(SBCTestData t) {
+        auto setABSYMem = [this](Byte operand) {
+            cpu.Y = 0x01;
+            mem[0xFF00] = CPU::INS_SBC_ABSY;
+            mem[0xFF01] = 0x00;
+            mem[0xFF02] = 0x80;
+            mem[0x8001] = operand;
+            return 4; // expected cycles;
+        };
+        Test(t, setABSYMem);
+    }
+
+    void TestINDX(SBCTestData t) {
+        auto setINDXMem = [this](Byte operand) {
+            cpu.X = 0x04;
+            mem[0xFF00] = CPU::INS_SBC_INDX;
+            mem[0xFF01] = 0x02;
+            mem[0x0006] = 0x00; // 0x2 + 0x4
+            mem[0x0007] = 0x80; 
+            mem[0x8000] = operand;
+            return 6; // expected cycles;
+        };
+        Test(t, setINDXMem);
+    }
+
+    void TestINDY(SBCTestData t) {
+        auto setINDYMem = [this](Byte operand) {
+            cpu.Y = 0x04;
+            mem[0xFF00] = CPU::INS_SBC_INDY;
+            mem[0xFF01] = 0x02;
+            mem[0x0002] = 0x00;
+            mem[0x0003] = 0x80; 
+            mem[0x8004] = operand; // 0x8000 + 0x04(Y)
+            return 5; // expected cycles;
+        };
+        Test(t, setINDYMem);
+    }
+
+
 };
 
 TEST_F(SubstractWithCarryTests, SBCAbsSub_0_0_WithNoCarry) {
@@ -185,7 +267,56 @@ TEST_F(SubstractWithCarryTests, SBCAbsSub_127_n1_WithNoCarry) {
 TEST_F(SubstractWithCarryTests, SBCAbsSub_20_17_WithNoCarry) {
     TestAbs(data_20_17_WithNoCarry);
 }
-
 TEST_F(SubstractWithCarryTests, SBCAbsSub_n20_n17_WithNoCarry) {
     TestAbs(data_n20_n17_WithNoCarry);
 }
+
+TEST_F(SubstractWithCarryTests, SBCImSub_20_17_WithNoCarry) {
+    TestIM(data_20_17_WithNoCarry);
+}
+TEST_F(SubstractWithCarryTests, SBCImSub_n20_n17_WithNoCarry) {
+    TestIM(data_n20_n17_WithNoCarry);
+}
+
+TEST_F(SubstractWithCarryTests, SBCZPSub_20_17_WithNoCarry) {
+    TestZP(data_20_17_WithNoCarry);
+}
+TEST_F(SubstractWithCarryTests, SBCZPSub_n20_n17_WithNoCarry) {
+    TestZP(data_n20_n17_WithNoCarry);
+}
+
+TEST_F(SubstractWithCarryTests, SBCZPXSub_20_17_WithNoCarry) {
+    TestZPX(data_20_17_WithNoCarry);
+}
+TEST_F(SubstractWithCarryTests, SBCZPXSub_n20_n17_WithNoCarry) {
+    TestZPX(data_n20_n17_WithNoCarry);
+}
+
+TEST_F(SubstractWithCarryTests, SBCABSXSub_20_17_WithNoCarry) {
+    TestABSX(data_20_17_WithNoCarry);
+}
+TEST_F(SubstractWithCarryTests, SBCABSXSub_n20_n17_WithNoCarry) {
+    TestABSX(data_n20_n17_WithNoCarry);
+}
+
+TEST_F(SubstractWithCarryTests, SBCABSYSub_20_17_WithNoCarry) {
+    TestABSY(data_20_17_WithNoCarry);
+}
+TEST_F(SubstractWithCarryTests, SBCABSYSub_n20_n17_WithNoCarry) {
+    TestABSY(data_n20_n17_WithNoCarry);
+}
+
+TEST_F(SubstractWithCarryTests, SBCINDXSub_20_17_WithNoCarry) {
+    TestINDX(data_20_17_WithNoCarry);
+}
+TEST_F(SubstractWithCarryTests, SBCINDXSub_n20_n17_WithNoCarry) {
+    TestINDX(data_n20_n17_WithNoCarry);
+}
+
+TEST_F(SubstractWithCarryTests, SBCINDYSub_20_17_WithNoCarry) {
+    TestINDY(data_20_17_WithNoCarry);
+}
+TEST_F(SubstractWithCarryTests, SBCINDYSub_n20_n17_WithNoCarry) {
+    TestINDY(data_n20_n17_WithNoCarry);
+}
+

@@ -608,8 +608,42 @@ s32 CPU::Execute(s32 cycles, Mem& memory) {
                 Byte operand = ReadByte(cycles, addr, memory);
                 Compare(operand, Y);
             } break;
+            case INS_SBC_IM: {
+                Byte operand = FetchByte(cycles, memory);
+                SBC(operand);
+            } break;
+            case INS_SBC_ZP: {
+                Word addr = AddrZeroPage(cycles, memory);
+                Byte operand = ReadByte(cycles, addr, memory);
+                SBC(operand);
+            } break;
+            case INS_SBC_ZPX: {
+                Word addr = AddrZeroPageXY(cycles, X, memory);
+                Byte operand = ReadByte(cycles, addr, memory);
+                SBC(operand);
+            } break;
             case INS_SBC_ABS: {
                 Word addr = AddrAbsolute(cycles, memory);
+                Byte operand = ReadByte(cycles, addr, memory);
+                SBC(operand);
+            } break;
+            case INS_SBC_ABSX: {
+                Word addr = AddrAbsoluteXY(cycles, X, memory);
+                Byte operand = ReadByte(cycles, addr, memory);
+                SBC(operand);
+            } break;
+            case INS_SBC_ABSY: {
+                Word addr = AddrAbsoluteXY(cycles, Y, memory);
+                Byte operand = ReadByte(cycles, addr, memory);
+                SBC(operand);
+            } break;
+            case INS_SBC_INDX: {
+                Word addr = AddrIndirectX(cycles, memory);
+                Byte operand = ReadByte(cycles, addr, memory);
+                SBC(operand);
+            } break;
+            case INS_SBC_INDY: {
+                Word addr = AddrIndirectY(cycles, memory);
                 Byte operand = ReadByte(cycles, addr, memory);
                 SBC(operand);
             } break;
