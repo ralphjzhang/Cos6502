@@ -78,6 +78,10 @@ s32 CPU::Execute(s32 cycles, Mem& memory) {
         N = (A & NFlagBit) > 0;
     };
 
+    auto SBC = [ADC](Byte operand) {
+        ADC(~operand);
+    };
+
     auto Compare = [this](Byte operand, Byte reg) {
         Byte diff = reg - operand;
         C = reg >= operand;
@@ -603,6 +607,11 @@ s32 CPU::Execute(s32 cycles, Mem& memory) {
                 Word addr = AddrAbsolute(cycles, memory);
                 Byte operand = ReadByte(cycles, addr, memory);
                 Compare(operand, Y);
+            } break;
+            case INS_SBC_ABS: {
+                Word addr = AddrAbsolute(cycles, memory);
+                Byte operand = ReadByte(cycles, addr, memory);
+                SBC(operand);
             } break;
 
             default: {
