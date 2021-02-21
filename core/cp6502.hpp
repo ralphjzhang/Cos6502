@@ -283,6 +283,17 @@ struct cp6502::CPU {
         INS_SBC_ABSY = 0xF9,
         INS_SBC_INDX = 0xE1,
         INS_SBC_INDY = 0xF1,
+        // Shift
+        INS_ASL_ACC = 0x0A,
+        INS_ASL_ZP = 0x06,
+        INS_ASL_ZPX = 0x16,
+        INS_ASL_ABS = 0x0E,
+        INS_ASL_ABSX = 0x1E,
+        INS_LSR_ACC = 0x4A,
+        INS_LSR_ZP = 0x46,
+        INS_LSR_ZPX = 0x56,
+        INS_LSR_ABS = 0x4E,
+        INS_LSR_ABSX = 0x5E,
         // Jumps And Calls
         INS_JSR = 0x20,
         INS_RTS = 0x60,

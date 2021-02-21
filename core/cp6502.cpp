@@ -89,6 +89,23 @@ s32 CPU::Execute(s32 cycles, Mem& memory) {
         N = (diff & NFlagBit) > 0;
     };
 
+    auto ASL = [&cycles, this](Byte operand) {
+        Byte result = operand << 1;
+        C = (operand & NFlagBit) >> 7;
+        Z = result == 0;
+        N = (result & NFlagBit) >> 7;
+        --cycles;
+        return result;
+    };
+    auto LSR = [&cycles, this](Byte operand) {
+        Byte result = operand >> 1;
+        C = (operand & 0b00000001) > 0;
+        Z = result == 0;
+        N = false;
+        --cycles;
+        return result;
+    };
+
     const s32 cyclesRequested = cycles;
     while (cycles > 0) {
         Byte ins = FetchByte(cycles, memory);
@@ -646,6 +663,54 @@ s32 CPU::Execute(s32 cycles, Mem& memory) {
                 Word addr = AddrIndirectY(cycles, memory);
                 Byte operand = ReadByte(cycles, addr, memory);
                 SBC(operand);
+            } break;
+            case INS_ASL_ACC: {
+                Byte operand = A;
+                A = ASL(operand);
+            } break;
+            case INS_ASL_ZP: {
+                Word addr = AddrZeroPage(cycles, memory);
+                Byte operand = ReadByte(cycles, addr, memory);
+                WriteByte(ASL(operand), cycles, addr, memory);
+            } break;
+            case INS_ASL_ZPX: {
+                Word addr = AddrZeroPageXY(cycles, X, memory);
+                Byte operand = ReadByte(cycles, addr, memory);
+                WriteByte(ASL(operand), cycles, addr, memory);
+            } break;
+            case INS_ASL_ABS: {
+                Word addr = AddrAbsolute(cycles, memory);
+                Byte operand = ReadByte(cycles, addr, memory);
+                WriteByte(ASL(operand), cycles, addr, memory);
+            } break;
+            case INS_ASL_ABSX: {
+                Word addr = AddrAbsoluteXY_5(cycles, X, memory);
+                Byte operand = ReadByte(cycles, addr, memory);
+                WriteByte(ASL(operand), cycles, addr, memory);
+            } break;
+            case INS_LSR_ACC: {
+                Byte operand = A;
+                A = LSR(operand);
+            } break;
+            case INS_LSR_ZP: {
+                Word addr = AddrZeroPage(cycles, memory);
+                Byte operand = ReadByte(cycles, addr, memory);
+                WriteByte(LSR(operand), cycles, addr, memory);
+            } break;
+            case INS_LSR_ZPX: {
+                Word addr = AddrZeroPageXY(cycles, X, memory);
+                Byte operand = ReadByte(cycles, addr, memory);
+                WriteByte(LSR(operand), cycles, addr, memory);
+            } break;
+            case INS_LSR_ABS: {
+                Word addr = AddrAbsolute(cycles, memory);
+                Byte operand = ReadByte(cycles, addr, memory);
+                WriteByte(LSR(operand), cycles, addr, memory);
+            } break;
+            case INS_LSR_ABSX: {
+                Word addr = AddrAbsoluteXY_5(cycles, X, memory);
+                Byte operand = ReadByte(cycles, addr, memory);
+                WriteByte(LSR(operand), cycles, addr, memory);
             } break;
 
             default: {
