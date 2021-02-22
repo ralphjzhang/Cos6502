@@ -267,6 +267,78 @@ struct ShiftTests : public testing::Test {
         };
         Test(t, set, &mem[0x8001]);
     }
+
+    ShiftData ror_0 = {
+        .Operand = 0,
+        .Answer = 0b10000000, // old C would be set to 1 before execute
+        .ExpectC = 0,
+        .ExpectZ = false,
+        .ExpectN = true
+    };
+
+    ShiftData ror_neg = {
+        .Operand = 0b11000010,
+        .Answer = 0b11100001, // old C would be set to 1 before execute
+        .ExpectC = 0,
+        .ExpectZ = false,
+        .ExpectN = true
+    };
+
+    ShiftData ror_pos = {
+        .Operand = 0b00000011,
+        .Answer = 0b00000001, // the new C will be 1, so C will be set to 0 before executing
+        .ExpectC = 1,
+        .ExpectZ = false,
+        .ExpectN = false
+    };
+    void TestROR_ACC(ShiftData t) {
+        auto set = [this](Byte operand) {
+            mem[0xFF00] = CPU::INS_ROR_ACC;
+            cpu.A = operand;
+            return 2;
+        };
+        Test(t, set, &cpu.A);
+    }
+    void TestROR_ZP(ShiftData t) {
+        auto set = [this](Byte operand) {
+            mem[0xFF00] = CPU::INS_ROR_ZP;
+            mem[0xFF01] = 0x42;
+            mem[0x0042] = operand;
+            return 5;
+        };
+        Test(t, set, &mem[0x0042]);
+    }
+    void TestROR_ZPX(ShiftData t) {
+        auto set = [this](Byte operand) {
+            cpu.X = 0x01;
+            mem[0xFF00] = CPU::INS_ROR_ZPX;
+            mem[0xFF01] = 0x42;
+            mem[0x0043] = operand;
+            return 6;
+        };
+        Test(t, set, &mem[0x0043]);
+    }
+    void TestROR_ABS(ShiftData t) {
+        auto set = [this](Byte operand) {
+            mem[0xFF00] = CPU::INS_ROR_ABS;
+            mem[0xFF01] = 0x00;
+            mem[0xFF02] = 0x80;
+            mem[0x8000] = operand;
+            return 6;
+        };
+        Test(t, set, &mem[0x8000]);
+    }
+    void TestROR_ABSX(ShiftData t) {
+        auto set = [this](Byte operand) {
+            cpu.X = 0x01;
+            mem[0xFF00] = CPU::INS_ROR_ABSX;
+            mem[0xFF01] = 0x00;
+            mem[0xFF02] = 0x80;
+            mem[0x8001] = operand;
+            return 7;
+        };
+        Test(t, set, &mem[0x8001]);
+    }
 };
 
 TEST_F(ShiftTests, ASL_ACC_0) {
@@ -419,6 +491,57 @@ TEST_F(ShiftTests, ROL_ABSX_neg) {
 }
 TEST_F(ShiftTests, ROL_ABSX_pos) {
     TestROL_ABSX(rol_pos);
+}
+
+// ROR
+TEST_F(ShiftTests, ROR_ACC_0) {
+    TestROR_ACC(ror_0);
+}
+TEST_F(ShiftTests, ROR_ACC_neg) {
+    TestROR_ACC(ror_neg);
+}
+TEST_F(ShiftTests, ROR_ACC_pos) {
+    TestROR_ACC(ror_pos);
+}
+
+TEST_F(ShiftTests, ROR_ZP_0) {
+    TestROR_ZP(ror_0);
+}
+TEST_F(ShiftTests, ROR_ZP_neg) {
+    TestROR_ZP(ror_neg);
+}
+TEST_F(ShiftTests, ROR_ZP_pos) {
+    TestROR_ZP(ror_pos);
+}
+
+TEST_F(ShiftTests, ROR_ZPX_0) {
+    TestROR_ZPX(ror_0);
+}
+TEST_F(ShiftTests, ROR_ZPX_neg) {
+    TestROR_ZPX(ror_neg);
+}
+TEST_F(ShiftTests, ROR_ZPX_pos) {
+    TestROR_ZPX(ror_pos);
+}
+
+TEST_F(ShiftTests, ROR_ABS_0) {
+    TestROR_ABS(ror_0);
+}
+TEST_F(ShiftTests, ROR_ABS_neg) {
+    TestROR_ABS(ror_neg);
+}
+TEST_F(ShiftTests, ROR_ABS_pos) {
+    TestROR_ABS(ror_pos);
+}
+
+TEST_F(ShiftTests, ROR_ABSX_0) {
+    TestROR_ABSX(ror_0);
+}
+TEST_F(ShiftTests, ROR_ABSX_neg) {
+    TestROR_ABSX(ror_neg);
+}
+TEST_F(ShiftTests, ROR_ABSX_pos) {
+    TestROR_ABSX(ror_pos);
 }
 
 

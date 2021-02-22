@@ -114,6 +114,15 @@ s32 CPU::Execute(s32 cycles, Mem& memory) {
         --cycles;
         return result;
     };
+    auto ROR = [&cycles, this](Byte operand) {
+        Byte result = operand >> 1;
+        result |= (C << 7);
+        C = (operand & 0b00000001);
+        Z = result == 0;
+        N = (result & NFlagBit) >> 7;
+        --cycles;
+        return result;
+    };
 
     const s32 cyclesRequested = cycles;
     while (cycles > 0) {
@@ -744,6 +753,30 @@ s32 CPU::Execute(s32 cycles, Mem& memory) {
                 Word addr = AddrAbsoluteXY_5(cycles, X, memory);
                 Byte operand = ReadByte(cycles, addr, memory);
                 WriteByte(ROL(operand), cycles, addr, memory);
+            } break;
+            case INS_ROR_ACC: {
+                Byte operand = A;
+                A = ROR(operand);
+            } break;
+            case INS_ROR_ZP: {
+                Word addr = AddrZeroPage(cycles, memory);
+                Byte operand = ReadByte(cycles, addr, memory);
+                WriteByte(ROR(operand), cycles, addr, memory);
+            } break;
+            case INS_ROR_ZPX: {
+                Word addr = AddrZeroPageXY(cycles, X, memory);
+                Byte operand = ReadByte(cycles, addr, memory);
+                WriteByte(ROR(operand), cycles, addr, memory);
+            } break;
+            case INS_ROR_ABS: {
+                Word addr = AddrAbsolute(cycles, memory);
+                Byte operand = ReadByte(cycles, addr, memory);
+                WriteByte(ROR(operand), cycles, addr, memory);
+            } break;
+            case INS_ROR_ABSX: {
+                Word addr = AddrAbsoluteXY_5(cycles, X, memory);
+                Byte operand = ReadByte(cycles, addr, memory);
+                WriteByte(ROR(operand), cycles, addr, memory);
             } break;
 
             default: {
