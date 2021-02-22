@@ -12,6 +12,7 @@ using u32 = unsigned int;
 using s32 = signed int;
 
 const static Byte NFlagBit = 0b10000000;
+const static Word StackBase = 0x0100;
 
 struct Mem;
 struct CPU;
@@ -102,12 +103,13 @@ struct cp6502::CPU {
     }
 
     Word SPToAddress() const {
-        return 0x0100 + SP;
+        return StackBase + SP;
     }
 
     void PushPCToStack(s32& cycles, Mem& memory) {
+        --SP;
         WriteWord(PC, cycles, SPToAddress(), memory);
-        SP -= 2;
+        --SP;
     }
 
     void PushByteOntoStack(s32& cycles, Byte value, Mem& memory) {
@@ -120,13 +122,14 @@ struct cp6502::CPU {
     Byte PopByteFromStack(s32& cycles, Mem& memory) {
         ++SP;
         Byte value = ReadByte(cycles, SPToAddress(), memory);
-        cycles -= 2;
+        cycles--;
         return value;
     }
 
     Word PopWordFromStack(s32& cycles, Mem& memory) {
-        SP += 2;
+        ++SP;
         Word addr = ReadWord(cycles, SPToAddress(), memory);
+        ++SP;
         --cycles;
         return addr;
     }
@@ -246,8 +249,6 @@ struct cp6502::CPU {
         INS_SEC = 0x38,
         INS_SED = 0xF8,
         INS_SEI = 0x78,
-        // NOP
-        INS_NOP = 0xEA,
         // Arithmetic
         INS_ADC_IM = 0x69,
         INS_ADC_ZP = 0x65,
@@ -308,7 +309,11 @@ struct cp6502::CPU {
         INS_JSR = 0x20,
         INS_RTS = 0x60,
         INS_JMP_ABS = 0x4C,
-        INS_JMP_IND = 0x6C
+        INS_JMP_IND = 0x6C,
+        // System functions
+        INS_BRK = 0x00,
+        INS_RTI = 0x40,
+        INS_NOP = 0xEA
         ;
 
     Word LoadProg(Byte* prog, u32 numBytes, Mem& memory);

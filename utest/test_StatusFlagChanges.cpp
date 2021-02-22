@@ -101,18 +101,3 @@ TEST_F(StatusFlagChangesTests, SEICanSetIRegister) {
     });
 }
 
-TEST_F(StatusFlagChangesTests, NOP) {
-    // given:
-    mem[0xFF00] = CPU::INS_NOP;
-    constexpr s32 EXPECTED_CYCLES = 2;
-    CPU cpuCopy = cpu;
-    // when:
-    const s32 actualCycles = cpu.Execute(EXPECTED_CYCLES, mem);
-    // then:
-    EXPECT_EQ(actualCycles, EXPECTED_CYCLES);
-    EXPECT_EQ(cpu.PS, cpuCopy.PS);
-    EXPECT_EQ(cpu.PC, cpuCopy.PC + 1);
-    EXPECT_EQ(cpu.A, cpuCopy.A);
-    EXPECT_EQ(cpu.X, cpuCopy.X);
-    EXPECT_EQ(cpu.Y, cpuCopy.Y);
-}

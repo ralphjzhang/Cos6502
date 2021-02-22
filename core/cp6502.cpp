@@ -290,12 +290,14 @@ s32 CPU::Execute(s32 cycles, Mem& memory) {
             case INS_PLA: {
                 A = PopByteFromStack(cycles, memory);
                 LoadRegisterSetStatus(A);
+                --cycles;
             } break;
             case INS_PHP: {
                 PushByteOntoStack(cycles, PS, memory);
             } break;
             case INS_PLP: {
                 PS = PopByteFromStack(cycles, memory);
+                --cycles;
             } break;
             // Logicals
             case INS_AND_IM: {
@@ -777,6 +779,17 @@ s32 CPU::Execute(s32 cycles, Mem& memory) {
                 Word addr = AddrAbsoluteXY_5(cycles, X, memory);
                 Byte operand = ReadByte(cycles, addr, memory);
                 WriteByte(ROR(operand), cycles, addr, memory);
+            } break;
+            case INS_BRK: {
+                PushPCToStack(cycles, memory);
+                PushByteOntoStack(cycles, PS, memory);
+                constexpr Word InterruptVector = 0xFFFE;
+                PC = ReadWord(cycles, InterruptVector, memory);
+                B = true;
+            } break;
+            case INS_RTI: {
+                PS = PopByteFromStack(cycles, memory);
+                PC = PopWordFromStack(cycles, memory);
             } break;
 
             default: {

@@ -19,6 +19,7 @@ add_executable(test_cp6502
     utest/test_Compare.cpp
     utest/test_SubstractWithCarry.cpp
     utest/test_Shifts.cpp
+    utest/test_SystemFunctions.cpp
     core/cp6502.cpp
     )
 target_link_libraries(test_cp6502 gtest_main gtest pthread)

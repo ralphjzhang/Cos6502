@@ -268,6 +268,7 @@ struct ShiftTests : public testing::Test {
         Test(t, set, &mem[0x8001]);
     }
 
+    // ROR
     ShiftData ror_0 = {
         .Operand = 0,
         .Answer = 0b10000000, // old C would be set to 1 before execute
@@ -275,7 +276,6 @@ struct ShiftTests : public testing::Test {
         .ExpectZ = false,
         .ExpectN = true
     };
-
     ShiftData ror_neg = {
         .Operand = 0b11000010,
         .Answer = 0b11100001, // old C would be set to 1 before execute
@@ -283,7 +283,6 @@ struct ShiftTests : public testing::Test {
         .ExpectZ = false,
         .ExpectN = true
     };
-
     ShiftData ror_pos = {
         .Operand = 0b00000011,
         .Answer = 0b00000001, // the new C will be 1, so C will be set to 0 before executing
@@ -543,5 +542,4 @@ TEST_F(ShiftTests, ROR_ABSX_neg) {
 TEST_F(ShiftTests, ROR_ABSX_pos) {
     TestROR_ABSX(ror_pos);
 }
-
 
