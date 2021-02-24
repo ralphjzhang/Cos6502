@@ -1,4 +1,5 @@
 #include <gtest/gtest.h>
+#include <stdio.h>
 
 #include "../core/cp6502.hpp"
 
@@ -45,3 +46,23 @@ TEST_F(LoadProgramTests, TestLoadProgramAndExecute) {
     // then;
     EXPECT_EQ(cpu.A, 0xFF);
 }
+
+/*
+TEST_F(LoadProgramTests, LoadFunctionalTest65) {
+    FILE *fp = fopen("/home/zhjun/Work/cp6502/stest/6502_functional_test.bin", "r");
+    fread(&mem[0x000A], 1, 65526, fp);
+    fclose(fp);
+    // Word StartAddress = 
+    cpu.PC = 0x400;
+    //then:
+    try {
+        while (true) {
+            cpu.Execute(1, mem);
+            // printf("0x%x ", cpu.PC);
+        }
+    }
+    catch (...) {
+        printf("Unknown exception in functional test\n");
+    }
+}
+*/

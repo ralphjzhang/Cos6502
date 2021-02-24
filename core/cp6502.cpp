@@ -58,14 +58,14 @@ s32 CPU::Execute(s32 cycles, Mem& memory) {
             cycles--;
             const bool pageChanged = (PC >> 8) != (oldPC >> 8);
             if (pageChanged)
-                cycles -= 2;
+                cycles--;
         }
     };
 
     auto ADC = [this](Byte operand) {
-        if (D) throw "Decimal not implemented";
-        Byte ASign = (A & NFlagBit);
-        Byte operandSign = (operand & NFlagBit);
+        if (D) printf("Decimal not implemented\n");
+        Byte ASign = (A & NegativeFlag);
+        Byte operandSign = (operand & NegativeFlag);
         Word sum = A;
         sum += C;
         sum += operand;
@@ -74,8 +74,8 @@ s32 CPU::Execute(s32 cycles, Mem& memory) {
         Z = (A == 0);
         // overflow:
         // two operand have same sign, but the result has different sign
-        V = (ASign == operandSign) && ((A & NFlagBit) != ASign);
-        N = (A & NFlagBit) > 0;
+        V = (ASign == operandSign) && ((A & NegativeFlag) != ASign);
+        N = (A & NegativeFlag) > 0;
     };
 
     auto SBC = [ADC](Byte operand) {
@@ -86,14 +86,14 @@ s32 CPU::Execute(s32 cycles, Mem& memory) {
         Byte diff = reg - operand;
         C = reg >= operand;
         Z = reg == operand;
-        N = (diff & NFlagBit) > 0;
+        N = (diff & NegativeFlag) > 0;
     };
 
     auto ASL = [&cycles, this](Byte operand) {
         Byte result = operand << 1;
-        C = (operand & NFlagBit) >> 7;
+        C = (operand & NegativeFlag) >> 7;
         Z = result == 0;
-        N = (result & NFlagBit) >> 7;
+        N = (result & NegativeFlag) >> 7;
         --cycles;
         return result;
     };
@@ -108,9 +108,9 @@ s32 CPU::Execute(s32 cycles, Mem& memory) {
     auto ROL = [&cycles, this](Byte operand) {
         Byte result = operand << 1;
         result |= (C & 0b00000001);
-        C = (operand & NFlagBit) >> 7;
+        C = (operand & NegativeFlag) >> 7;
         Z = result == 0;
-        N = (result & NFlagBit) >> 7;
+        N = (result & NegativeFlag) >> 7;
         --cycles;
         return result;
     };
@@ -119,9 +119,18 @@ s32 CPU::Execute(s32 cycles, Mem& memory) {
         result |= (C << 7);
         C = (operand & 0b00000001);
         Z = result == 0;
-        N = (result & NFlagBit) >> 7;
+        N = (result & NegativeFlag) >> 7;
         --cycles;
         return result;
+    };
+    auto PushPSToStack = [&cycles, &memory, this]() {
+        Byte PSStack = PS | BreakFlag | UnusedFlag;
+        PushByteOntoStack(cycles, PSStack, memory);
+    };
+    auto PopPSFromStack = [&cycles, &memory, this]() {
+        PS = PopByteFromStack(cycles, memory);
+        B = false;
+        Unused = false;
     };
 
     const s32 cyclesRequested = cycles;
@@ -256,13 +265,14 @@ s32 CPU::Execute(s32 cycles, Mem& memory) {
             } break;
             case INS_JSR: {
                 Word subAddr = FetchWord(cycles, memory);
-                PushPCToStack(cycles, memory);
+                PushPCMinusOneToStack(cycles, memory);
+                // PushPCToStack(cycles, memory);
                 PC = subAddr;
                 --cycles;
             } break;
             case INS_RTS: {
-                Word retAddr = PopWordFromStack(cycles, memory);
-                PC = retAddr;
+                Word retAddrMinusOne = PopWordFromStack(cycles, memory);
+                PC = retAddrMinusOne + 1;
                 cycles -= 2;
             } break;
             case INS_JMP_ABS: {
@@ -293,10 +303,10 @@ s32 CPU::Execute(s32 cycles, Mem& memory) {
                 --cycles;
             } break;
             case INS_PHP: {
-                PushByteOntoStack(cycles, PS, memory);
+                PushPSToStack();
             } break;
             case INS_PLP: {
-                PS = PopByteFromStack(cycles, memory);
+                PopPSFromStack();
                 --cycles;
             } break;
             // Logicals
@@ -781,19 +791,22 @@ s32 CPU::Execute(s32 cycles, Mem& memory) {
                 WriteByte(ROR(operand), cycles, addr, memory);
             } break;
             case INS_BRK: {
-                PushPCToStack(cycles, memory);
-                PushByteOntoStack(cycles, PS, memory);
+                // BRK is differnet from other push: it pushes PC+1 instead of PC
+                PushPCPlusOneToStack(cycles, memory);
+                PushPSToStack();
                 constexpr Word InterruptVector = 0xFFFE;
                 PC = ReadWord(cycles, InterruptVector, memory);
                 B = true;
+                I = true;
             } break;
             case INS_RTI: {
-                PS = PopByteFromStack(cycles, memory);
+                PopPSFromStack();
                 PC = PopWordFromStack(cycles, memory);
             } break;
 
             default: {
-                throw "Instruction not implemented";
+                printf("Instruction not implemented: %x\n", ins);
+                throw -1;
             } break;
         }
     }

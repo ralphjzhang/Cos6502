@@ -11,7 +11,15 @@ using Word = unsigned short;
 using u32 = unsigned int;
 using s32 = signed int;
 
-const static Byte NFlagBit = 0b10000000;
+constexpr Byte CarryFlag        = 0b00000001;
+constexpr Byte ZeroFlag         = 0b00000010;
+constexpr Byte InterruptFlag    = 0b00000100;
+constexpr Byte DecimalFlag      = 0b00001000;
+constexpr Byte BreakFlag        = 0b00010000;
+constexpr Byte UnusedFlag       = 0b00100000;
+constexpr Byte OverflowFlag     = 0b00100000;
+constexpr Byte NegativeFlag     = 0b10000000;
+
 const static Word StackBase = 0x0100;
 
 struct Mem;
@@ -46,14 +54,14 @@ struct cp6502::CPU {
     union {
         Byte PS;
         struct {
-            Byte C : 1; // status flags
-            Byte Z : 1;
-            Byte I : 1;
-            Byte D : 1;
-            Byte B : 1;
-            Byte Unused : 1;
-            Byte V : 1;
-            Byte N : 1;
+            Byte C : 1;         // 0: Carry
+            Byte Z : 1;         // 1: Zero
+            Byte I : 1;         // 2: Interrupe
+            Byte D : 1;         // 3: Decimal
+            Byte B : 1;         // 4: Break
+            Byte Unused : 1;    // 5: Unused
+            Byte V : 1;         // 6: Overflow
+            Byte N : 1;         // 7: Negative
         };
     };
 
@@ -104,6 +112,18 @@ struct cp6502::CPU {
 
     Word SPToAddress() const {
         return StackBase + SP;
+    }
+
+    void PushPCMinusOneToStack(s32& cycles, Mem& memory) {
+        --SP;
+        WriteWord(PC-1, cycles, SPToAddress(), memory);
+        --SP;
+    }
+
+    void PushPCPlusOneToStack(s32& cycles, Mem& memory) {
+        --SP;
+        WriteWord(PC+1, cycles, SPToAddress(), memory);
+        --SP;
     }
 
     void PushPCToStack(s32& cycles, Mem& memory) {
@@ -344,7 +364,8 @@ struct cp6502::CPU {
     Word AddrAbsoluteXY(s32& cycles, Byte regXY, Mem const& memory) {
         Word absAddr = FetchWord(cycles, memory);
         Word addr = absAddr + regXY;
-        if (addr - absAddr >= 0xFF) // crosses page boundary
+        bool pageCrossed = (absAddr & 0xFF00) != (addr & 0xFF00);
+        if (pageCrossed)
             --cycles;
         return addr;
     }
@@ -368,7 +389,8 @@ struct cp6502::CPU {
         Byte zpAddr = FetchByte(cycles, memory);
         Word effectiveAddr = ReadWord(cycles, zpAddr, memory);
         Word effectiveAddrY = effectiveAddr + Y;
-        if (effectiveAddrY - effectiveAddr >= 0xFF) // crosses page boundary
+        const bool pageCrossed = (effectiveAddr & 0xFF00) != (effectiveAddrY & 0xFF00);
+        if (pageCrossed)
             --cycles;
         return effectiveAddrY;
     }

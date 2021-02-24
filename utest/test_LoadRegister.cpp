@@ -112,11 +112,11 @@ struct LoadRegisterTests : public testing::Test {
 
     void TestLoadAbsoluteXYWhenCrossPage(Byte opcode, Byte CPU::*RegisterToAdd, Byte CPU::*Register) {
         // given:
-        cpu.*RegisterToAdd = 0xFF;
+        cpu.*RegisterToAdd = 0x01;
         mem[0xFFFC] = opcode;
-        mem[0xFFFD] = 0x02;
+        mem[0xFFFD] = 0xFF;
         mem[0xFFFE] = 0x44; // 0x4402
-        mem[0x4501] = 0x37; // 0x4402+0x00FF, 
+        mem[0x4500] = 0x37; // 0x4402+0x00FF, 
         constexpr s32 EXPECTED_CYCLES = 5;
         CPU cpuCopy = cpu;
         // when:
@@ -305,12 +305,12 @@ TEST_F(LoadRegisterTests, LDAIndirectYCanLoadAValueIntoTheARegister) {
 
 TEST_F(LoadRegisterTests, LDAIndirectYCanLoadAValueIntoTheARegisterWhenCrossAPage) {
     // given:
-    cpu.Y = 0xFF;
+    cpu.Y = 0x01;
     mem[0xFFFC] = CPU::INS_LDA_INDY;
-    mem[0xFFFD] = 0x02;
-    mem[0x0002] = 0x02;
-    mem[0x0003] = 0x80; 
-    mem[0x8101] = 0x37; // 0x8002 + 0xFF(Y)
+    mem[0xFFFD] = 0x05;
+    mem[0x0005] = 0xFF;
+    mem[0x0006] = 0x80; 
+    mem[0x8100] = 0x37; // 0x80FF + 0x01(Y)
     constexpr s32 EXPECTED_CYCLES = 6;
     CPU cpuCopy = cpu;
     // when:

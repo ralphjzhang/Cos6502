@@ -18,7 +18,6 @@ struct SystemFunctionTests : public testing::Test {
     void ExpectUnaffectedRegisters(CPU const& cpuCopy) {
         EXPECT_EQ(cpu.C, cpuCopy.C);
         EXPECT_EQ(cpu.Z, cpuCopy.Z);
-        EXPECT_EQ(cpu.I, cpuCopy.I);
         EXPECT_EQ(cpu.D, cpuCopy.D);
         EXPECT_EQ(cpu.V, cpuCopy.V);
         EXPECT_EQ(cpu.N, cpuCopy.N);
@@ -38,10 +37,12 @@ TEST_F(SystemFunctionTests, BRKPushesPCAndPS) {
     const s32 actualCycles = cpu.Execute(EXPECTED_CYCLES, mem);
     // then:
     EXPECT_EQ(actualCycles, EXPECTED_CYCLES);
+    EXPECT_TRUE(cpu.I);
     EXPECT_EQ(cpu.SP, 0xFF-3);
-    EXPECT_EQ(mem[cpu.SPToAddress()+1], cpuCopy.PS);
-    EXPECT_EQ(mem[cpu.SPToAddress()+2], 0x01);
-    EXPECT_EQ(mem[cpu.SPToAddress()+3], 0xFF); // pushed PC: 0xFF01
+    EXPECT_EQ(mem[cpu.SPToAddress()+1],
+        cpuCopy.PS | BreakFlag | UnusedFlag);
+    EXPECT_EQ(mem[cpu.SPToAddress()+2], 0x02);
+    EXPECT_EQ(mem[cpu.SPToAddress()+3], 0xFF); // pushed PC: 0xFF01+0x01
     ExpectUnaffectedRegisters(cpuCopy);
 }
 
@@ -58,6 +59,7 @@ TEST_F(SystemFunctionTests, BRKLoadsPCAndSetBFlag) {
     EXPECT_EQ(actualCycles, EXPECTED_CYCLES);
     EXPECT_EQ(cpu.PC, 0x9000);
     EXPECT_TRUE(cpu.B);
+    EXPECT_TRUE(cpu.I);
     ExpectUnaffectedRegisters(cpuCopy);
 }
 
@@ -77,7 +79,7 @@ TEST_F(SystemFunctionTests, RTIPullsPSAndPC) {
     EXPECT_EQ(actualCycles, EXPECTED_CYCLES);
     EXPECT_EQ(cpuCopy.SP, cpu.SP);
     EXPECT_EQ(cpuCopy.PS, cpu.PS);
-    EXPECT_EQ(cpuCopy.PC+1, cpu.PC);
+    EXPECT_EQ(cpuCopy.PC+2, cpu.PC);
 }
 
 

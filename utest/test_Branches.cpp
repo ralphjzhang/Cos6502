@@ -72,7 +72,7 @@ struct BranchesTests : public testing::Test {
         setRegister();
         mem[0xFEFD] = opcode;
         mem[0xFEFE] = 0x1;
-        constexpr s32 EXPECTED_CYCLES = 5;
+        constexpr s32 EXPECTED_CYCLES = 4;
         CPU cpuCopy = cpu;
         // when:
         const s32 actualCycles = cpu.Execute(EXPECTED_CYCLES, mem);
@@ -90,7 +90,7 @@ struct BranchesTests : public testing::Test {
         signed char offset = -3;
         mem[0xFF00] = opcode;
         mem[0xFF01] = offset; // branch to 0xFEFF
-        constexpr s32 EXPECTED_CYCLES = 5;
+        constexpr s32 EXPECTED_CYCLES = 4;
         CPU cpuCopy = cpu;
         // when:
         const s32 actualCycles = cpu.Execute(EXPECTED_CYCLES, mem);

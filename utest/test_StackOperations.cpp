@@ -109,9 +109,34 @@ TEST_F(StackOperations, PHPCanPushStatusRegistersOntoStack) {
     const s32 actualCycles = cpu.Execute(EXPECTED_CYCLES, mem);
     // then:
     EXPECT_EQ(actualCycles, EXPECTED_CYCLES);
-    EXPECT_EQ(mem[cpu.SPToAddress() + 1], cpu.PS);
+    EXPECT_EQ(mem[cpu.SPToAddress() + 1], cpu.PS | BreakFlag | UnusedFlag);
     EXPECT_EQ(cpu.PS, cpuCopy.PS);
     EXPECT_EQ(cpu.SP, 0xFE);
+}
+
+TEST_F(StackOperations, PHPSetBit4and5OnStack) {
+    // given:
+    cpu.PS = 0x00;
+    mem[0xFF00] = CPU::INS_PHP;
+    constexpr s32 EXPECTED_CYCLES = 3;
+    CPU cpuCopy = cpu;
+    // when:
+    const s32 actualCycles = cpu.Execute(EXPECTED_CYCLES, mem);
+    // then:
+    Word AddPSOnStack = cpu.SPToAddress() + 1;
+    EXPECT_EQ(actualCycles, EXPECTED_CYCLES);
+    // struct {
+    //     Byte C : 1;         // 0: Carry
+    //     Byte Z : 1;         // 1: Zero
+    //     Byte I : 1;         // 2: Interrupe
+    //     Byte D : 1;         // 3: Decimal
+    //     Byte B : 1;         // 4: Break
+    //     Byte Unused : 1;    // 5: Unused
+    //     Byte V : 1;         // 6: Overflow
+    //     Byte N : 1;         // 7: Negative
+    // };
+    const Byte FlagsOnStack = 0b00110000;
+    EXPECT_EQ(mem[AddPSOnStack], FlagsOnStack);
 }
 
 TEST_F(StackOperations, PLACanPullFromStackToARegister) {
@@ -170,12 +195,12 @@ TEST_F(StackOperations, PLACanPullANegativeValueFromStackIntoRegister) {
     EXPECT_EQ(cpu.SP, 0xFF);
 }
 
-TEST_F(StackOperations, PLPCanPullStatusRegistersFromStack) {
+TEST_F(StackOperations, PLPPullPSFromStackIgnoreBit4And5) {
     // given:
     cpu.SP = 0xFE;
     cpu.PS = 0x00;
     mem[0xFF00] = CPU::INS_PLP;
-    mem[0x01FF] = 0x42;
+    mem[0x01FF] = 0x42 | BreakFlag | UnusedFlag;
     constexpr s32 EXPECTED_CYCLES = 4;
     CPU cpuCopy = cpu;
     // when:
@@ -184,5 +209,20 @@ TEST_F(StackOperations, PLPCanPullStatusRegistersFromStack) {
     EXPECT_EQ(actualCycles, EXPECTED_CYCLES);
     EXPECT_EQ(cpu.PS, 0x42);
     EXPECT_EQ(cpu.SP, 0xFF);
+}
+
+TEST_F(StackOperations, PLPClearBit4And5) {
+    // given:
+    cpu.SP = 0xFE;
+    cpu.PS = BreakFlag | UnusedFlag;
+    mem[0xFF00] = CPU::INS_PLP;
+    mem[0x01FF] = 0;
+    constexpr s32 EXPECTED_CYCLES = 4;
+    CPU cpuCopy = cpu;
+    // when:
+    const s32 actualCycles = cpu.Execute(EXPECTED_CYCLES, mem);
+    // then:
+    EXPECT_EQ(actualCycles, EXPECTED_CYCLES);
+    EXPECT_EQ(cpu.PS, 0);
 }
 
